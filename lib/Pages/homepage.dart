@@ -26,13 +26,13 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigator.push(
-          //     context,
-          //     MaterialPageRoute(
-          //       builder: (context) => SearchPage(
-          //           userModel: widget.userModel,
-          //           firebaseUser: widget.firebaseUser),
-          //     ));
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SearchPage(
+                    userModel: widget.userModel,
+                    firebaseUser: widget.firebaseUser),
+              ));
         },
         child: Icon(Icons.search),
       ),
