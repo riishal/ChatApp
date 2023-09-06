@@ -1,4 +1,4 @@
-import 'package:chat_app/Pages/Complited_profile.dart';
+import 'package:chat_app/Pages/Completed_profile.dart';
 import 'package:chat_app/models/ui_helper.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

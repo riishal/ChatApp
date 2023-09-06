@@ -94,6 +94,11 @@ class _HomePageState extends State<HomePage> {
                           if (userData.data != null) {
                             UserModel targetUser = userData.data as UserModel;
                             return ListTile(
+                              trailing: Icon(Icons.circle,
+                                  color: chatRoomModel.lastMessage !=
+                                          widget.userModel.uid
+                                      ? Colors.green
+                                      : Colors.amber),
                               onTap: () {
                                 Navigator.push(
                                     context,

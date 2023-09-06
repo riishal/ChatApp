@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:intl/intl.dart';
 
 class ChatroomPage extends StatefulWidget {
   final UserModel targetUser;
@@ -87,6 +88,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
                 if (snapshot.connectionState == ConnectionState.active) {
                   if (snapshot.hasData) {
                     QuerySnapshot dataSnapshot = snapshot.data as QuerySnapshot;
+
                     return ListView.builder(
                       reverse: true,
                       itemCount: dataSnapshot.docs.length,
@@ -94,32 +96,64 @@ class _ChatroomPageState extends State<ChatroomPage> {
                         MessageModel currentMessage = MessageModel.fromMap(
                             dataSnapshot.docs[index].data()
                                 as Map<String, dynamic>);
+                        String currentTime = DateFormat('h:mm a')
+                            .format(currentMessage.createdone!);
                         return Row(
                           mainAxisAlignment:
                               currentMessage.sender == widget.userModel.uid
                                   ? MainAxisAlignment.end
                                   : MainAxisAlignment.start,
                           children: [
-                            Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                margin: EdgeInsets.symmetric(vertical: 2),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    color: currentMessage.sender ==
+                            currentMessage.sender == widget.userModel.uid
+                                ? SizedBox(
+                                    width: 60,
+                                  )
+                                : SizedBox(
+                                    width: 0,
+                                  ),
+                            Flexible(
+                              child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 10),
+                                  margin: EdgeInsets.symmetric(vertical: 2),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(5),
+                                      color: currentMessage.sender ==
+                                              widget.userModel.uid
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .secondary
+                                          : Colors.grey[400]),
+                                  child: Column(
+                                    crossAxisAlignment: currentMessage.sender ==
                                             widget.userModel.uid
-                                        ? Colors.grey
-                                        : Theme.of(context)
-                                            .colorScheme
-                                            .secondary),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      currentMessage.text.toString(),
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ],
-                                )),
+                                        ? CrossAxisAlignment.end
+                                        : CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        currentMessage.text.toString(),
+                                        style: TextStyle(
+                                            fontSize: 17,
+                                            color: currentMessage.sender ==
+                                                    widget.userModel.uid
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        currentTime,
+                                        style: TextStyle(
+                                            fontSize: 10,
+                                            color: currentMessage.sender ==
+                                                    widget.userModel.uid
+                                                ? Colors.white
+                                                : Colors.black),
+                                      )
+                                    ],
+                                  )),
+                            ),
                           ],
                         );
                       },

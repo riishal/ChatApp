@@ -1,4 +1,4 @@
-import 'package:chat_app/Pages/Complited_profile.dart';
+import 'package:chat_app/Pages/Completed_profile.dart';
 import 'package:chat_app/Pages/LoginPage.dart';
 import 'package:chat_app/Pages/SignUp_page.dart';
 import 'package:chat_app/Pages/homepage.dart';

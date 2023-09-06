@@ -24,24 +24,45 @@ class CompliteProfile extends StatefulWidget {
 }
 
 class _CompliteProfileState extends State<CompliteProfile> {
-  File? selectedImage;
+  File? imageFile;
   TextEditingController fullNameController = TextEditingController();
-  Future pickImageFromGallery() async {
-    final returnrdImage =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (returnrdImage == null) return;
-    setState(() {
-      selectedImage = File(returnrdImage.path);
-    });
+  // Future pickImageFromGallery() async {
+  //   final returnrdImage =
+  //       await ImagePicker().pickImage(source: ImageSource.gallery);
+  //   if (returnrdImage == null) return;
+  //   setState(() {
+  //     selectedImage = File(returnrdImage.path);
+  //   });
+  // }
+
+  // Future selectImageFromCamera() async {
+  //   final returnrdImage =
+  //       await ImagePicker().pickImage(source: ImageSource.camera);
+  //   if (returnrdImage == null) return;
+  //   setState(() {
+  //     selectedImage = File(returnrdImage.path);
+  //   });
+  // }
+  void selectImage(ImageSource source) async {
+    XFile? pickedFile = await ImagePicker().pickImage(source: source);
+    if (pickedFile != null) {
+      cropImage(pickedFile);
+    }
   }
 
-  Future selectImageFromCamera() async {
-    final returnrdImage =
-        await ImagePicker().pickImage(source: ImageSource.camera);
-    if (returnrdImage == null) return;
-    setState(() {
-      selectedImage = File(returnrdImage.path);
-    });
+  void cropImage(XFile file) async {
+    CroppedFile? cropedImage = await ImageCropper.platform.cropImage(
+        sourcePath: file.path,
+        aspectRatio: CropAspectRatio(
+          ratioX: 1,
+          ratioY: 1,
+        ),
+        compressQuality: 20);
+    if (cropedImage != null) {
+      setState(() {
+        imageFile = File(cropedImage.path);
+      });
+    }
   }
 
   void showPhotoOptions() {
@@ -52,7 +73,8 @@ class _CompliteProfileState extends State<CompliteProfile> {
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             onTap: () {
-              pickImageFromGallery();
+              selectImage(ImageSource.gallery);
+              // pickImageFromGallery();
               Navigator.pop(context);
             },
             leading: Icon(Icons.photo_album),
@@ -60,7 +82,8 @@ class _CompliteProfileState extends State<CompliteProfile> {
           ),
           ListTile(
             onTap: () {
-              selectImageFromCamera();
+              selectImage(ImageSource.camera);
+              // selectImageFromCamera();
               Navigator.pop(context);
             },
             leading: Icon(Icons.camera),
@@ -73,7 +96,7 @@ class _CompliteProfileState extends State<CompliteProfile> {
 
   void checkValues() {
     String fullname = fullNameController.text.trim();
-    if (fullname == "" || selectedImage == null) {
+    if (fullname == "" || imageFile == null) {
       UIHelper.showAlertDialog(context, "Incomplite Data",
           "Please fill all the fields and upload a profile picture");
     } else {
@@ -86,7 +109,7 @@ class _CompliteProfileState extends State<CompliteProfile> {
     UploadTask uploadTask = FirebaseStorage.instance
         .ref("profilepictures")
         .child(widget.userModel.uid.toString())
-        .putFile(selectedImage!);
+        .putFile(imageFile!);
 
     TaskSnapshot snapshot = await uploadTask;
     String imageUrl = await snapshot.ref.getDownloadURL();
@@ -114,7 +137,7 @@ class _CompliteProfileState extends State<CompliteProfile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text("Complite Profile"),
+        title: Text("Complete Profile"),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -124,21 +147,33 @@ class _CompliteProfileState extends State<CompliteProfile> {
           SizedBox(
             height: 20,
           ),
-          CupertinoButton(
-            padding: EdgeInsets.all(0),
-            onPressed: () {
-              showPhotoOptions();
-            },
-            child: CircleAvatar(
-                backgroundImage:
-                    selectedImage != null ? FileImage(selectedImage!) : null,
-                radius: 60,
-                child: selectedImage == null
-                    ? Icon(
-                        Icons.person,
-                        size: 60,
-                      )
-                    : null),
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              CircleAvatar(
+                  backgroundColor: Colors.grey[400],
+                  backgroundImage:
+                      imageFile != null ? FileImage(imageFile!) : null,
+                  radius: 60,
+                  child: imageFile == null
+                      ? Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 60,
+                        )
+                      : null),
+              Positioned(
+                bottom: 0,
+                right: 100,
+                child: CircleAvatar(
+                  child: IconButton(
+                      onPressed: () {
+                        showPhotoOptions();
+                      },
+                      icon: Icon(Icons.camera_alt)),
+                ),
+              )
+            ],
           ),
           SizedBox(
             height: 20,
