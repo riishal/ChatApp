@@ -45,6 +45,11 @@ class _ChatroomPageState extends State<ChatroomPage> {
           .doc(newMessage.messageId)
           .set(newMessage.toMap());
       print("message send!");
+      widget.chatroom.lastMessage = msg;
+      FirebaseFirestore.instance
+          .collection("chatrooms")
+          .doc(widget.chatroom.chatroomId)
+          .set(widget.chatroom.toMap());
     }
   }
 
@@ -68,7 +73,70 @@ class _ChatroomPageState extends State<ChatroomPage> {
           child: Container(
         child: Column(children: [
           //this is where the chats will go
-          Expanded(child: Container()),
+          Expanded(
+              child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection("chatrooms")
+                  .doc(widget.chatroom.chatroomId)
+                  .collection("messages")
+                  .orderBy("createdone", descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.active) {
+                  if (snapshot.hasData) {
+                    QuerySnapshot dataSnapshot = snapshot.data as QuerySnapshot;
+                    return ListView.builder(
+                      reverse: true,
+                      itemCount: dataSnapshot.docs.length,
+                      itemBuilder: (context, index) {
+                        MessageModel currentMessage = MessageModel.fromMap(
+                            dataSnapshot.docs[index].data()
+                                as Map<String, dynamic>);
+                        return Row(
+                          mainAxisAlignment:
+                              currentMessage.sender == widget.userModel.uid
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.start,
+                          children: [
+                            Container(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 10),
+                                margin: EdgeInsets.symmetric(vertical: 2),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5),
+                                    color: currentMessage.sender ==
+                                            widget.userModel.uid
+                                        ? Colors.grey
+                                        : Theme.of(context)
+                                            .colorScheme
+                                            .secondary),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      currentMessage.text.toString(),
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                )),
+                          ],
+                        );
+                      },
+                    );
+                  } else if (snapshot.hasError) {
+                    return Center(
+                        child: Text(
+                            "An error occured ! please check your internet connection."));
+                  } else {
+                    return Center(child: Text("Say hi to your new firend"));
+                  }
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+          )),
           Container(
             color: Colors.grey[200],
             padding: EdgeInsets.symmetric(horizontal: 15),

@@ -1,4 +1,5 @@
 import 'package:chat_app/Pages/Complited_profile.dart';
+import 'package:chat_app/models/ui_helper.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,6 +16,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  bool isHidden = true;
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController cpasswordController = TextEditingController();
@@ -23,9 +25,12 @@ class _SignUpPageState extends State<SignUpPage> {
     String password = passwordController.text.trim();
     String cPassword = cpasswordController.text.trim();
     if (email == "" || password == "" || cPassword == "") {
-      print('please fill all the fields');
+      UIHelper.showAlertDialog(
+          context, "Incomplite Data", "Please fill all the fields");
     } else if (password != cPassword) {
       print('passwords do not match');
+      UIHelper.showAlertDialog(context, "Password Mismatch",
+          "The password you entered  do not match!");
     } else {
       signUp(email, password);
       print('signUp Successful');
@@ -34,10 +39,14 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void signUp(String email, String password) async {
     UserCredential? userCredential;
+    UIHelper.showLoadingDialog(context, "Creating new account...");
     try {
       userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (ex) {
+      Navigator.pop(context);
+      UIHelper.showAlertDialog(
+          context, "An error occured", ex.message.toString());
       print(ex.code.toString());
     }
     if (userCredential != null) {
@@ -51,7 +60,8 @@ class _SignUpPageState extends State<SignUpPage> {
           .then(
         (value) {
           print('New user Created');
-          Navigator.push(
+          Navigator.popUntil(context, (route) => route.isFirst);
+          Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (context) => CompliteProfile(
@@ -91,9 +101,15 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               TextFormField(
                 controller: passwordController,
-                obscureText: true,
+                obscureText: isHidden,
                 decoration: InputDecoration(
                   labelText: "Password",
+                  suffixIcon: InkWell(
+                      onTap: togglePasswordView,
+                      child: Icon(
+                        isHidden ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      )),
                 ),
               ),
               SizedBox(
@@ -101,9 +117,15 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               TextFormField(
                 controller: cpasswordController,
-                obscureText: true,
+                obscureText: isHidden,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
+                  suffixIcon: InkWell(
+                      onTap: togglePasswordView,
+                      child: Icon(
+                        isHidden ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      )),
                 ),
               ),
               SizedBox(
@@ -113,11 +135,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Text('Sign Up '),
                 onPressed: () {
                   checkValue();
-                  // Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //       builder: (context) => CompliteProfile(),
-                  //     ));
                 },
                 color: Theme.of(context).colorScheme.secondary,
               )
@@ -143,5 +160,11 @@ class _SignUpPageState extends State<SignUpPage> {
         ]),
       ),
     );
+  }
+
+  void togglePasswordView() {
+    setState(() {
+      isHidden = !isHidden;
+    });
   }
 }

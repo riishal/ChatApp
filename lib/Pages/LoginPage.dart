@@ -1,5 +1,6 @@
 import 'package:chat_app/Pages/SignUp_page.dart';
 import 'package:chat_app/Pages/homepage.dart';
+import 'package:chat_app/models/ui_helper.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -18,10 +19,13 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool isHidden = true;
   void checkValues() {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
     if (email == "" || password == "") {
+      UIHelper.showAlertDialog(
+          context, "Incomplited Data", "Please fill all the fields");
       print('please fill All fields!');
     } else {
       //login
@@ -31,10 +35,17 @@ class _LoginPageState extends State<LoginPage> {
 
   void logIn(String email, String password) async {
     UserCredential? userCredential;
+    UIHelper.showLoadingDialog(context, "Logging In..");
     try {
       userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseAuthException catch (ex) {
+      //Close the Loading Dialog
+
+      Navigator.pop(context);
+      //Show Alert Dialog
+      UIHelper.showAlertDialog(
+          context, "An error occured", ex.message.toString());
       print(ex.message.toString());
     }
     if (userCredential != null) {
@@ -45,13 +56,13 @@ class _LoginPageState extends State<LoginPage> {
           UserModel.fromMap(userData.data() as Map<String, dynamic>);
       //go to Homepage
       print('Login successful');
-      // Navigator.pushAndRemoveUntil(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => HomePage(
-      //           userModel: userModel, firebaseUser: userCredential!.user!),
-      //     ),
-      //     (route) => false);
+      Navigator.popUntil(context, (route) => route.isFirst);
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+                userModel: userModel, firebaseUser: userCredential!.user!),
+          ));
     }
   }
 
@@ -84,9 +95,15 @@ class _LoginPageState extends State<LoginPage> {
               ),
               TextFormField(
                 controller: passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: isHidden,
+                decoration: InputDecoration(
                   labelText: "Password",
+                  suffixIcon: InkWell(
+                      onTap: togglePasswordView,
+                      child: Icon(
+                        isHidden ? Icons.visibility_off : Icons.visibility,
+                        color: Colors.grey,
+                      )),
                 ),
               ),
               const SizedBox(
@@ -125,5 +142,11 @@ class _LoginPageState extends State<LoginPage> {
         ]),
       ),
     );
+  }
+
+  void togglePasswordView() {
+    setState(() {
+      isHidden = !isHidden;
+    });
   }
 }

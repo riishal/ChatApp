@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/Pages/homepage.dart';
+import 'package:chat_app/models/ui_helper.dart';
 import 'package:chat_app/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -73,13 +74,15 @@ class _CompliteProfileState extends State<CompliteProfile> {
   void checkValues() {
     String fullname = fullNameController.text.trim();
     if (fullname == "" || selectedImage == null) {
-      print('please fill all the fields');
+      UIHelper.showAlertDialog(context, "Incomplite Data",
+          "Please fill all the fields and upload a profile picture");
     } else {
       uploadData();
     }
   }
 
   void uploadData() async {
+    UIHelper.showLoadingDialog(context, "Uploading Image..");
     UploadTask uploadTask = FirebaseStorage.instance
         .ref("profilepictures")
         .child(widget.userModel.uid.toString())
@@ -96,7 +99,8 @@ class _CompliteProfileState extends State<CompliteProfile> {
         .set(widget.userModel.toMap())
         .then((value) {
       print('Data Uploaded');
-      Navigator.push(
+      Navigator.popUntil(context, (route) => route.isFirst);
+      Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => HomePage(

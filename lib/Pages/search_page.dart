@@ -45,7 +45,9 @@ class _SearchPageState extends State<SearchPage> {
           participants: {
             widget.userModel.uid.toString(): true,
             targetUser.uid.toString(): true
-          });
+          },
+          users: [widget.userModel.uid.toString(), targetUser.uid.toString()],
+          createdone: DateTime.now());
       await FirebaseFirestore.instance
           .collection("chatrooms")
           .doc(newChatroom.chatroomId)
