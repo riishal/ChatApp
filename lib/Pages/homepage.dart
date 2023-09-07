@@ -1,5 +1,6 @@
 import 'package:chat_app/Pages/LoginPage.dart';
 import 'package:chat_app/Pages/chatroom_page.dart';
+import 'package:chat_app/Pages/drawe_page.dart';
 import 'package:chat_app/Pages/search_page.dart';
 import 'package:chat_app/models/chat_room.dart';
 import 'package:chat_app/models/firebase_helper.dart';
@@ -23,44 +24,51 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: DrawerPage(
+        firebaseUser: widget.firebaseUser,
+        userModel: widget.userModel,
+      ),
       appBar: AppBar(
         title: Text(
           'Chat App',
         ),
         actions: [
-          IconButton(
-              onPressed: () async {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text("Log Out?"),
-                    content: Text("Are you sure want to log out?"),
-                    actions: [
-                      TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text("Cancel")),
-                      TextButton(
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.popUntil(
-                                context, (route) => route.isFirst);
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LoginPage(),
-                                ));
-                          },
-                          child: Text(
-                            "Log out",
-                            style: TextStyle(color: Colors.red),
-                          )),
-                    ],
-                  ),
-                );
-              },
-              icon: Icon(Icons.logout))
+          StreamBuilder(
+            stream: FirebaseFirestore.instance.collection("users").snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.active) {
+                if (snapshot.hasData) {
+                  QuerySnapshot dataSnapshot = snapshot.data as QuerySnapshot;
+                  if (dataSnapshot.docs.length > 0) {
+                    Map<String, dynamic> userMap =
+                        dataSnapshot.docs[0].data() as Map<String, dynamic>;
+                    UserModel currentUser = UserModel.fromMap(userMap);
+                    return InkWell(
+                      onTap: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                      child: CircleAvatar(
+                        backgroundImage: NetworkImage(
+                          currentUser.profilepic!,
+                        ),
+                      ),
+                    );
+                  } else {
+                    return Text('No Result Found!');
+                  }
+                } else if (snapshot.hasError) {
+                  return Text('An error occured');
+                } else {
+                  return Text('No Result Found!');
+                }
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ),
+          SizedBox(
+            width: 10,
+          ),
         ],
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -94,11 +102,11 @@ class _HomePageState extends State<HomePage> {
                           if (userData.data != null) {
                             UserModel targetUser = userData.data as UserModel;
                             return ListTile(
-                              trailing: Icon(Icons.circle,
-                                  color: chatRoomModel.lastMessage !=
-                                          widget.userModel.uid
-                                      ? Colors.green
-                                      : Colors.amber),
+                              // trailing: Icon(Icons.circle,
+                              //     color: chatRoomModel.lastMessage !=
+                              //             widget.userModel.uid
+                              //         ? Colors.green
+                              //         : Colors.amber),
                               onTap: () {
                                 Navigator.push(
                                     context,

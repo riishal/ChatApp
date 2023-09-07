@@ -26,23 +26,7 @@ class CompliteProfile extends StatefulWidget {
 class _CompliteProfileState extends State<CompliteProfile> {
   File? imageFile;
   TextEditingController fullNameController = TextEditingController();
-  // Future pickImageFromGallery() async {
-  //   final returnrdImage =
-  //       await ImagePicker().pickImage(source: ImageSource.gallery);
-  //   if (returnrdImage == null) return;
-  //   setState(() {
-  //     selectedImage = File(returnrdImage.path);
-  //   });
-  // }
 
-  // Future selectImageFromCamera() async {
-  //   final returnrdImage =
-  //       await ImagePicker().pickImage(source: ImageSource.camera);
-  //   if (returnrdImage == null) return;
-  //   setState(() {
-  //     selectedImage = File(returnrdImage.path);
-  //   });
-  // }
   void selectImage(ImageSource source) async {
     XFile? pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
@@ -105,7 +89,7 @@ class _CompliteProfileState extends State<CompliteProfile> {
   }
 
   void uploadData() async {
-    UIHelper.showLoadingDialog(context, "Uploading Image..");
+    UIHelper.showLoadingDialog(context, "Loading...");
     UploadTask uploadTask = FirebaseStorage.instance
         .ref("profilepictures")
         .child(widget.userModel.uid.toString())

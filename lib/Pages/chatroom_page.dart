@@ -89,7 +89,16 @@ class _ChatroomPageState extends State<ChatroomPage> {
                   if (snapshot.hasData) {
                     QuerySnapshot dataSnapshot = snapshot.data as QuerySnapshot;
 
-                    return ListView.builder(
+                    return ListView.separated(
+                      separatorBuilder: (context, index) {
+                        MessageModel currentMessage = MessageModel.fromMap(
+                            dataSnapshot.docs[index].data()
+                                as Map<String, dynamic>);
+
+                        return SizedBox(
+                          height: 8,
+                        );
+                      },
                       reverse: true,
                       itemCount: dataSnapshot.docs.length,
                       itemBuilder: (context, index) {

@@ -17,6 +17,8 @@ class SignUpPage extends StatefulWidget {
 
 class _SignUpPageState extends State<SignUpPage> {
   bool isHidden = true;
+  bool isHidden1 = true;
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController cpasswordController = TextEditingController();
@@ -117,13 +119,13 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               TextFormField(
                 controller: cpasswordController,
-                obscureText: isHidden,
+                obscureText: isHidden1,
                 decoration: InputDecoration(
                   labelText: "Confirm Password",
                   suffixIcon: InkWell(
-                      onTap: togglePasswordView,
+                      onTap: togglePasswordView1,
                       child: Icon(
-                        isHidden ? Icons.visibility_off : Icons.visibility,
+                        isHidden1 ? Icons.visibility_off : Icons.visibility,
                         color: Colors.grey,
                       )),
                 ),
@@ -165,6 +167,12 @@ class _SignUpPageState extends State<SignUpPage> {
   void togglePasswordView() {
     setState(() {
       isHidden = !isHidden;
+    });
+  }
+
+  void togglePasswordView1() {
+    setState(() {
+      isHidden1 = !isHidden1;
     });
   }
 }
