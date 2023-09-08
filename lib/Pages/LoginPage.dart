@@ -1,3 +1,4 @@
+import 'package:chat_app/Pages/Completed_profile.dart';
 import 'package:chat_app/Pages/SignUp_page.dart';
 import 'package:chat_app/Pages/homepage.dart';
 import 'package:chat_app/models/ui_helper.dart';
@@ -68,38 +69,45 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  // void signUpGoogle() async {
-  //   UserCredential? userCredential;
-  //   // UIHelper.showLoadingDialog(context, "Sign In..");
-  //   await Google_Signin().signInWithGoogle();
-  //   try {
-  //     userCredential = await Google_Signin().signInWithGoogle();
-  //   } on FirebaseAuthException catch (ex) {
-  //     //Close the Loading Dialog
+  void signUpGoogle() async {
+    UserCredential? userCredential;
+    // UIHelper.showLoadingDialog(context, "GoogleSign in...");
 
-  //     Navigator.pop(context);
-  //     //Show Alert Dialog
-  //     UIHelper.showAlertDialog(
-  //         context, "An error occured", ex.message.toString());
-  //     print(ex.message.toString());
-  //   }
-  //   if (userCredential != null) {
-  //     String uid = userCredential.user!.uid;
-  //     DocumentSnapshot userData =
-  //         await FirebaseFirestore.instance.collection("users").doc(uid).get();
-  //     UserModel userModel =
-  //         UserModel.fromMap(userData.data() as Map<String, dynamic>);
-  //     //go to Homepage
-  //     print('Login successful');
-  //     Navigator.popUntil(context, (route) => route.isFirst);
-  //     Navigator.pushReplacement(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => HomePage(
-  //               userModel: userModel, firebaseUser: userCredential!.user!),
-  //         ));
-  //   }
-  // }
+    try {
+      userCredential = await Google_Signin().signInWithGoogle();
+    } on FirebaseAuthException catch (ex) {
+      Navigator.pop(context);
+      UIHelper.showAlertDialog(
+          context, "An error occured", ex.message.toString());
+      print(ex.code.toString());
+    }
+    if (userCredential != null) {
+      String uid = userCredential.user!.uid;
+      UserModel newUser = UserModel(
+          uid: uid,
+          email: userCredential.user!.email,
+          fullName: userCredential.user!.displayName,
+          profilepic: userCredential.user!.photoURL);
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(uid)
+          .set(newUser.toMap())
+          .then(
+        (value) {
+          print('New user Created');
+          Navigator.popUntil(context, (route) => route.isFirst);
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => HomePage(
+                      userModel: newUser, firebaseUser: userCredential!.user!)
+                  // CompliteProfile(
+                  //     userModel: newUser, firebaseUser: userCredential!.user!),
+                  ));
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.bold),
               ),
               const SizedBox(
-                height: 10,
+                height: 19,
               ),
               TextFormField(
                 controller: emailController,
@@ -162,7 +170,7 @@ class _LoginPageState extends State<LoginPage> {
                 width: 200,
                 child: ElevatedButton(
                     onPressed: (() {
-                      // signUpGoogle();
+                      signUpGoogle();
                     }),
                     style: ElevatedButton.styleFrom(
                         backgroundColor:

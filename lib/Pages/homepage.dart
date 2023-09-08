@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 class HomePage extends StatefulWidget {
   final UserModel userModel;
   final User firebaseUser;
+
   const HomePage(
       {super.key, required this.userModel, required this.firebaseUser});
 
@@ -33,39 +34,16 @@ class _HomePageState extends State<HomePage> {
           'Chat App',
         ),
         actions: [
-          StreamBuilder(
-            stream: FirebaseFirestore.instance.collection("users").snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.active) {
-                if (snapshot.hasData) {
-                  QuerySnapshot dataSnapshot = snapshot.data as QuerySnapshot;
-                  if (dataSnapshot.docs.length > 0) {
-                    Map<String, dynamic> userMap =
-                        dataSnapshot.docs[0].data() as Map<String, dynamic>;
-                    UserModel currentUser = UserModel.fromMap(userMap);
-                    return InkWell(
-                      onTap: () {
-                        Scaffold.of(context).openDrawer();
-                      },
-                      child: CircleAvatar(
-                        backgroundImage: NetworkImage(
-                          currentUser.profilepic!,
-                        ),
-                      ),
-                    );
-                  } else {
-                    return Text('No Result Found!');
-                  }
-                } else if (snapshot.hasError) {
-                  return Text('An error occured');
-                } else {
-                  return Text('No Result Found!');
-                }
-              } else {
-                return CircularProgressIndicator();
-              }
-            },
-          ),
+          Builder(builder: (context) {
+            return InkWell(
+              onTap: () {
+                Scaffold.of(context).openDrawer();
+              },
+              child: CircleAvatar(
+                backgroundImage: NetworkImage(widget.userModel.profilepic!),
+              ),
+            );
+          }),
           SizedBox(
             width: 10,
           ),
@@ -101,6 +79,7 @@ class _HomePageState extends State<HomePage> {
                         if (userData.connectionState == ConnectionState.done) {
                           if (userData.data != null) {
                             UserModel targetUser = userData.data as UserModel;
+
                             return ListTile(
                               // trailing: Icon(Icons.circle,
                               //     color: chatRoomModel.lastMessage !=
@@ -136,6 +115,10 @@ class _HomePageState extends State<HomePage> {
                                               .colorScheme
                                               .secondary),
                                     ),
+                              trailing: Icon(
+                                Icons.circle,
+                                color: Colors.green,
+                              ),
                             );
                           } else {
                             return Container();

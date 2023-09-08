@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.brown),
       home: LoginPage(),
       debugShowCheckedModeBanner: false,
     );
@@ -56,6 +57,7 @@ class MyAppLoggedIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.brown),
       debugShowCheckedModeBanner: false,
       home: HomePage(userModel: userModel, firebaseUser: firebaseUser),
     );

@@ -96,7 +96,12 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 as Map<String, dynamic>);
 
                         return SizedBox(
-                          height: 8,
+                          height: 10,
+                          // child: widget.chatroom.lastMessage != null
+                          //     ? currentMessage.seen != null
+                          //         ? Text('seen')
+                          //         : Text('Not seen')
+                          //     : SizedBox()
                         );
                       },
                       reverse: true,
