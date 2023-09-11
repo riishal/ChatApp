@@ -47,6 +47,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
           .set(newMessage.toMap());
       print("message send!");
       widget.chatroom.lastMessage = msg;
+      widget.chatroom.seen = false;
       FirebaseFirestore.instance
           .collection("chatrooms")
           .doc(widget.chatroom.chatroomId)
@@ -54,8 +55,22 @@ class _ChatroomPageState extends State<ChatroomPage> {
     }
   }
 
+  updateSeenMessage() {
+    widget.chatroom.seen = true;
+    FirebaseFirestore.instance
+        .collection("chatrooms")
+        .doc(widget.chatroom.chatroomId)
+        .set(widget.chatroom.toMap())
+        .then((value) {
+      print('Set last seen Message');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!widget.chatroom.seen) {
+      updateSeenMessage();
+    }
     return Scaffold(
       appBar: AppBar(
         title: Row(children: [

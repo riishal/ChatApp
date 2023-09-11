@@ -115,10 +115,15 @@ class _HomePageState extends State<HomePage> {
                                               .colorScheme
                                               .secondary),
                                     ),
-                              trailing: Icon(
-                                Icons.circle,
-                                color: Colors.green,
-                              ),
+                              trailing: chatRoomModel.seen
+                                  ? Icon(
+                                      Icons.circle,
+                                      color: Colors.transparent,
+                                    )
+                                  : Icon(
+                                      Icons.circle,
+                                      color: Colors.green,
+                                    ),
                             );
                           } else {
                             return Container();
