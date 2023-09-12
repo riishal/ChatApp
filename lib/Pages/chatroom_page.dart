@@ -38,7 +38,7 @@ class _ChatroomPageState extends State<ChatroomPage> {
           sender: widget.userModel.uid,
           createdone: DateTime.now(),
           text: msg,
-          seen: false);
+          lastseen: false);
       FirebaseFirestore.instance
           .collection("chatrooms")
           .doc(widget.chatroom.chatroomId)
@@ -48,6 +48,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
       print("message send!");
       widget.chatroom.lastMessage = msg;
       widget.chatroom.seen = false;
+      //changed
+      widget.chatroom.fromId = widget.userModel.uid;
       FirebaseFirestore.instance
           .collection("chatrooms")
           .doc(widget.chatroom.chatroomId)
@@ -57,12 +59,26 @@ class _ChatroomPageState extends State<ChatroomPage> {
 
   updateSeenMessage() {
     widget.chatroom.seen = true;
+    widget.chatroom.fromId = "";
     FirebaseFirestore.instance
         .collection("chatrooms")
         .doc(widget.chatroom.chatroomId)
         .set(widget.chatroom.toMap())
         .then((value) {
       print('Set last seen Message');
+    });
+  }
+
+  updateLastSeenMessage(MessageModel messageModel) {
+    messageModel.lastseen = true;
+    FirebaseFirestore.instance
+        .collection("chatrooms")
+        .doc(widget.chatroom.chatroomId)
+        .collection("messages")
+        .doc(messageModel.messageId)
+        .set(messageModelToMap(messageModel))
+        .then((value) {
+      print('Message updated');
     });
   }
 
@@ -111,7 +127,8 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 as Map<String, dynamic>);
 
                         return SizedBox(
-                          height: 10,
+                          height: 16,
+
                           // child: widget.chatroom.lastMessage != null
                           //     ? currentMessage.seen != null
                           //         ? Text('seen')
@@ -127,6 +144,9 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                 as Map<String, dynamic>);
                         String currentTime = DateFormat('h:mm a')
                             .format(currentMessage.createdone!);
+                        if (currentMessage.sender == widget.targetUser.uid) {
+                          updateLastSeenMessage(currentMessage);
+                        }
                         return Row(
                           mainAxisAlignment:
                               currentMessage.sender == widget.userModel.uid
@@ -171,18 +191,39 @@ class _ChatroomPageState extends State<ChatroomPage> {
                                       SizedBox(
                                         height: 10,
                                       ),
-                                      Text(
-                                        currentTime,
-                                        style: TextStyle(
-                                            fontSize: 10,
-                                            color: currentMessage.sender ==
-                                                    widget.userModel.uid
-                                                ? Colors.white
-                                                : Colors.black),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            currentTime,
+                                            style: TextStyle(
+                                                fontSize: 10,
+                                                color: currentMessage.sender ==
+                                                        widget.userModel.uid
+                                                    ? Colors.white
+                                                    : Colors.black),
+                                          ),
+                                          currentMessage.sender ==
+                                                  widget.userModel.uid
+                                              ? Icon(Icons.done_all,
+                                                  color:
+                                                      currentMessage.lastseen ??
+                                                              false
+                                                          ? Colors.green
+                                                          : Colors.grey,
+                                                  size: 18)
+                                              : const SizedBox.shrink(),
+                                        ],
                                       )
                                     ],
                                   )),
                             ),
+                            currentMessage.sender != widget.userModel.uid
+                                ? SizedBox(
+                                    width: 60,
+                                  )
+                                : SizedBox(
+                                    width: 0,
+                                  ),
                           ],
                         );
                       },

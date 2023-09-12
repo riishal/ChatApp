@@ -81,11 +81,6 @@ class _HomePageState extends State<HomePage> {
                             UserModel targetUser = userData.data as UserModel;
 
                             return ListTile(
-                              // trailing: Icon(Icons.circle,
-                              //     color: chatRoomModel.lastMessage !=
-                              //             widget.userModel.uid
-                              //         ? Colors.green
-                              //         : Colors.amber),
                               onTap: () {
                                 Navigator.push(
                                     context,
@@ -115,15 +110,16 @@ class _HomePageState extends State<HomePage> {
                                               .colorScheme
                                               .secondary),
                                     ),
-                              trailing: chatRoomModel.seen
-                                  ? Icon(
-                                      Icons.circle,
-                                      color: Colors.transparent,
-                                    )
-                                  : Icon(
-                                      Icons.circle,
-                                      color: Colors.green,
-                                    ),
+                              trailing:
+                                  chatRoomModel.fromId == widget.userModel.uid
+                                      ? SizedBox.shrink()
+                                      : chatRoomModel.seen
+                                          ? SizedBox.shrink()
+                                          : const Icon(
+                                              Icons.error,
+                                              color: Colors.green,
+                                              size: 25,
+                                            ),
                             );
                           } else {
                             return Container();
